@@ -35,9 +35,15 @@ extension ReviewsViewModel {
     func getReviews() {
         guard state.shouldLoad else { return }
         state.shouldLoad = false
-        reviewsProvider.getReviews(offset: state.offset, completion: gotReviews)
+        DispatchQueue.global().async { [weak self] in
+            guard let self = self else { return }
+            self.reviewsProvider.getReviews(offset: state.offset) { result in
+                DispatchQueue.main.async {
+                    self.gotReviews(result)
+                }
+            }
+        }
     }
-
 }
 
 // MARK: - Private
@@ -49,6 +55,7 @@ private extension ReviewsViewModel {
         do {
             let data = try result.get()
             let reviews = try decoder.decode(Reviews.self, from: data)
+            state.items.removeAll { $0 is ReviewsCountCellConfig }
             state.items += reviews.items.map(makeReviewItem)
             let countConfig = ReviewsCountCellConfig(totalCount: reviews.count)
             state.items.append(countConfig)
@@ -69,6 +76,7 @@ private extension ReviewsViewModel {
         else { return }
         item.maxLines = .zero
         state.items[index] = item
+        state.heightCache[id] = nil
         onStateChange?(state)
     }
 
@@ -92,7 +100,9 @@ private extension ReviewsViewModel {
             rating: rating,
             reviewText: reviewText,
             created: created,
-            onTapShowMore: showMoreReview
+            onTapShowMore: { [weak self] id in
+                self?.showMoreReview(with: id)
+            }
         )
        return item
     }
@@ -121,8 +131,23 @@ extension ReviewsViewModel: UITableViewDataSource {
 extension ReviewsViewModel: UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        state.items[indexPath.row].height(with: tableView.bounds.size)
-    }
+            let config = state.items[indexPath.row]
+            
+            // Для ReviewCellConfig используем кэш
+            if let reviewConfig = config as? ReviewCellConfig {
+                let key = reviewConfig.id
+                if let cachedHeight = state.heightCache[key] {
+                    return cachedHeight
+                } else {
+                    let newHeight = reviewConfig.height(with: tableView.bounds.size)
+                    state.heightCache[key] = newHeight
+                    return newHeight
+                }
+            } else {
+                // Для остальных типов высота фиксированная
+                return config.height(with: tableView.bounds.size)
+            }
+        }
 
     /// Метод дозапрашивает отзывы, если до конца списка отзывов осталось два с половиной экрана по высоте.
     func scrollViewWillEndDragging(
