@@ -50,6 +50,8 @@ private extension ReviewsViewModel {
             let data = try result.get()
             let reviews = try decoder.decode(Reviews.self, from: data)
             state.items += reviews.items.map(makeReviewItem)
+            let countConfig = ReviewsCountCellConfig(totalCount: reviews.count)
+            state.items.append(countConfig)
             state.offset += state.limit
             state.shouldLoad = state.offset < reviews.count
         } catch {
@@ -81,12 +83,18 @@ private extension ReviewsViewModel {
     func makeReviewItem(_ review: Review) -> ReviewItem {
         let reviewText = review.text.attributed(font: .text)
         let created = review.created.attributed(font: .created, color: .created)
+        let userAvatar = UIImage(named: "l5w5aIHioYc")
+        let userName = (review.first_name + " " + review.last_name).attributed(font: .username)
+        let rating = review.rating
         let item = ReviewItem(
+            userAvatar: userAvatar,
+            userName: userName,
+            rating: rating,
             reviewText: reviewText,
             created: created,
             onTapShowMore: showMoreReview
         )
-        return item
+       return item
     }
 
 }
