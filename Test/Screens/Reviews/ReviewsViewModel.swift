@@ -94,7 +94,9 @@ private extension ReviewsViewModel {
         let userAvatar = UIImage(named: "l5w5aIHioYc")
         let userName = (review.first_name + " " + review.last_name).attributed(font: .username)
         let rating = review.rating
+        let avatarUrl = review.avatar_url
         let item = ReviewItem(
+            avatarURL: avatarUrl,
             userAvatar: userAvatar,
             userName: userName,
             rating: rating,
