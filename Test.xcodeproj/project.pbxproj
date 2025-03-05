@@ -29,6 +29,7 @@
 		21ED1F652D69D0340012D6F6 /* ReviewsScreenFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21ED1F642D69D0340012D6F6 /* ReviewsScreenFactory.swift */; };
 		DB569A4B2D736E6300354B1B /* ReviewsCountCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB569A4A2D736E6300354B1B /* ReviewsCountCell.swift */; };
 		DB82612F2D78EDB2003EB4D9 /* ReviewsImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB82612E2D78EDB2003EB4D9 /* ReviewsImageLoader.swift */; };
+		DB8261312D78FF4E003EB4D9 /* LoadingIndicatorLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8261302D78FF4E003EB4D9 /* LoadingIndicatorLayer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -55,6 +56,7 @@
 		21ED1F642D69D0340012D6F6 /* ReviewsScreenFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewsScreenFactory.swift; sourceTree = "<group>"; };
 		DB569A4A2D736E6300354B1B /* ReviewsCountCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewsCountCell.swift; sourceTree = "<group>"; };
 		DB82612E2D78EDB2003EB4D9 /* ReviewsImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewsImageLoader.swift; sourceTree = "<group>"; };
+		DB8261302D78FF4E003EB4D9 /* LoadingIndicatorLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicatorLayer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -163,6 +165,7 @@
 				21667B7F2D4A25B2009AAA76 /* RatingRenderer.swift */,
 				216668752D48F39E009AAA76 /* Cells */,
 				DB82612E2D78EDB2003EB4D9 /* ReviewsImageLoader.swift */,
+				DB8261302D78FF4E003EB4D9 /* LoadingIndicatorLayer.swift */,
 			);
 			path = Reviews;
 			sourceTree = "<group>";
@@ -283,6 +286,7 @@
 				21B841712D47C5F00085DAA2 /* TableCellConfig.swift in Sources */,
 				21ED1F652D69D0340012D6F6 /* ReviewsScreenFactory.swift in Sources */,
 				2166686F2D48E23F009AAA76 /* Fonts.swift in Sources */,
+				DB8261312D78FF4E003EB4D9 /* LoadingIndicatorLayer.swift in Sources */,
 				21B82E312D47B0640085DAA2 /* AppDelegate.swift in Sources */,
 				DB82612F2D78EDB2003EB4D9 /* ReviewsImageLoader.swift in Sources */,
 				21B8416F2D47C4C60085DAA2 /* String+Ext.swift in Sources */,

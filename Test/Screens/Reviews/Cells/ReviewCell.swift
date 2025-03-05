@@ -77,6 +77,7 @@ private extension ReviewCellConfig {
 // MARK: - Cell
 
 final class ReviewCell: UITableViewCell {
+    private let showMoreIndicator = ShowMoreActivityIndicator(frame: CGRect(x: 0, y: 0, width: 16, height: 16))
     
     fileprivate var config: Config?
     
@@ -106,6 +107,7 @@ final class ReviewCell: UITableViewCell {
         avatarImageView.frame = layout.avatarFrame
         usernameLabel.frame = layout.usernameFrame
         ratingImageView.frame = layout.ratingFrame
+        showMoreIndicator.center = showMoreButton.center
     }
     
 }
@@ -121,6 +123,7 @@ private extension ReviewCell {
         setupAvatarImageView()
         setupUsernameLabel()
         setupRatingImageView()
+        setupShowMoreIndicator()
     }
     
     func setupReviewTextLabel() {
@@ -155,11 +158,22 @@ private extension ReviewCell {
         ratingImageView.contentMode = .scaleAspectFit
     }
     
+    func setupShowMoreIndicator() {
+        contentView.addSubview(showMoreIndicator) 
+        showMoreIndicator.isHidden = true
+    }
+    
     @objc
     private func didTapShowMore() {
-       /// Если конфигурация установлена, вызываем ее замыкание onTapShowMore, передавая уникальный id этой ячейки.
-        if let id = config?.id {
-            config?.onTapShowMore(id)
+        guard let id = config?.id else { return }
+
+        showMoreButton.isHidden = true
+        showMoreIndicator.startAnimating()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            self?.showMoreIndicator.stopAnimating()
+            self?.showMoreButton.isHidden = false
+            self?.config?.onTapShowMore(id)
         }
     }
 }
