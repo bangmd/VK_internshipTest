@@ -8,6 +8,8 @@ struct ReviewCellConfig {
     
     /// Идентификатор конфигурации. Можно использовать для поиска конфигурации в массиве.
     let id = UUID()
+    /// URL аватара пользователя.
+    let avatarURL: String?
     /// Аватар пользователя, оставившего отзыв.
     let userAvatar: UIImage?
     /// Имя пользователя
@@ -43,6 +45,15 @@ extension ReviewCellConfig: TableCellConfig {
         cell.usernameLabel.attributedText = userName
         cell.ratingImageView.image = ratingRenderer.ratingImage(rating)
         cell.config = self
+        
+        if let avatarURL = avatarURL, let url = URL(string: avatarURL) {
+            ImageLoader.shared.loadImage(from: url) { [weak cell] image in
+                guard let cell = cell else { return }
+                cell.avatarImageView.image = image
+            }
+        } else {
+            cell.avatarImageView.image = userAvatar
+        }
     }
     
     /// Метод, возвращаюший высоту ячейки с данным ограничением по размеру.

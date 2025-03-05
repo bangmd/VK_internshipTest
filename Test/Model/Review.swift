@@ -11,4 +11,6 @@ struct Review: Decodable {
     let last_name: String
     /// Рейтинг отзыва
     let rating: Int
+    /// URL аватара пользователя.
+    let avatar_url: String?
 }
