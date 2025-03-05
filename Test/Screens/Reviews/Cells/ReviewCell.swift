@@ -125,6 +125,7 @@ private extension ReviewCell {
         contentView.addSubview(showMoreButton)
         showMoreButton.contentVerticalAlignment = .fill
         showMoreButton.setAttributedTitle(Config.showMoreText, for: .normal)
+        showMoreButton.addTarget(self, action: #selector(didTapShowMore), for: .touchUpInside)
     }
     
     func setupAvatarImageView() {
@@ -143,6 +144,13 @@ private extension ReviewCell {
         ratingImageView.contentMode = .scaleAspectFit
     }
     
+    @objc
+    private func didTapShowMore() {
+       /// Если конфигурация установлена, вызываем ее замыкание onTapShowMore, передавая уникальный id этой ячейки.
+        if let id = config?.id {
+            config?.onTapShowMore(id)
+        }
+    }
 }
 
 // MARK: - Layout
