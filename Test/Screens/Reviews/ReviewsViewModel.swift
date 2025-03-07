@@ -2,15 +2,16 @@ import UIKit
 
 /// Класс, описывающий бизнес-логику экрана отзывов.
 final class ReviewsViewModel: NSObject {
-
+    
     /// Замыкание, вызываемое при изменении `state`.
     var onStateChange: ((State) -> Void)?
-
+    weak var reviewsViewController: ReviewsViewController?
+    
     private var state: State
     private let reviewsProvider: ReviewsProvider
     private let ratingRenderer: RatingRenderer
     private let decoder: JSONDecoder
-
+    
     init(
         state: State = State(),
         reviewsProvider: ReviewsProvider = ReviewsProvider(),
@@ -22,13 +23,13 @@ final class ReviewsViewModel: NSObject {
         self.ratingRenderer = ratingRenderer
         self.decoder = decoder
     }
-
+    
 }
 
 // MARK: - Internal
 
 extension ReviewsViewModel {
-
+    
     typealias State = ReviewsViewModelState
     
     /// Метод получения отзывов.
@@ -57,15 +58,21 @@ extension ReviewsViewModel {
     func refreshReviews() {
         state.offset = 0
         state.shouldLoad = true
-        state.isRefreshing = true 
+        state.isRefreshing = true
         getReviews()
     }
+    
+    func getItem(at index: Int) -> (any TableCellConfig)? {
+        guard index >= 0, index < state.items.count else { return nil }
+        return state.items[index]
+    }
+    
 }
 
 // MARK: - Private
 
 private extension ReviewsViewModel {
-
+    
     /// Метод обработки получения отзывов.
     func gotReviews(_ result: ReviewsProvider.GetReviewsResult) {
         do {
@@ -85,7 +92,7 @@ private extension ReviewsViewModel {
         state.isRefreshing = false
         onStateChange?(state)
     }
-
+    
     /// Метод, вызываемый при нажатии на кнопку "Показать полностью...".
     /// Снимает ограничение на количество строк текста отзыва (раскрывает текст).
     func showMoreReview(with id: UUID) {
@@ -98,15 +105,15 @@ private extension ReviewsViewModel {
         state.heightCache[id] = nil
         onStateChange?(state)
     }
-
+    
 }
 
 // MARK: - Items
 
 private extension ReviewsViewModel {
-
+    
     typealias ReviewItem = ReviewCellConfig
-
+    
     func makeReviewItem(_ review: Review) -> ReviewItem {
         let reviewText = review.text.attributed(font: .text)
         let created = review.created.attributed(font: .created, color: .created)
@@ -129,51 +136,83 @@ private extension ReviewsViewModel {
                 self?.showMoreReview(with: id)
             }
         )
-       return item
+        return item
     }
-
+    
 }
 
 // MARK: - UITableViewDataSource
 
 extension ReviewsViewModel: UITableViewDataSource {
-
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         state.items.count
     }
-
+    
+//    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let config = state.items[indexPath.row]
+//        let cell = tableView.dequeueReusableCell(withIdentifier: config.reuseId, for: indexPath)
+//        config.update(cell: cell)
+//        return cell
+//    }
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let config = state.items[indexPath.row]
+        guard let config = getItem(at: indexPath.row) else {
+            return UITableViewCell() // Защита от выхода за границы массива
+        }
+
         let cell = tableView.dequeueReusableCell(withIdentifier: config.reuseId, for: indexPath)
         config.update(cell: cell)
+
+        // Проверяем, является ли config типом ReviewCellConfig
+        if let reviewConfig = config as? ReviewCellConfig,
+           let reviewCell = cell as? ReviewCell {
+            reviewCell.updatePhotoGallery(photoNames: reviewConfig.photoNames)
+            reviewCell.onImageTap = { [weak self] image in
+            self?.presentPhotoViewer(with: image)
+            }
+        }
+
         return cell
     }
 
+    private func presentPhotoViewer(with image: UIImage) {
+        guard let viewController = reviewsViewController else {
+            print("Ошибка: reviewsViewController = nil")
+            return
+        }
+        
+        let viewerVC = PhotoViewerViewController(image: image)
+        viewerVC.modalPresentationStyle = .fullScreen
+        viewController.present(viewerVC, animated: true)
+    }
+
+    
 }
 
 // MARK: - UITableViewDelegate
 
 extension ReviewsViewModel: UITableViewDelegate {
-
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-            let config = state.items[indexPath.row]
-            
-            // Для ReviewCellConfig используем кэш
-            if let reviewConfig = config as? ReviewCellConfig {
-                let key = reviewConfig.id
-                if let cachedHeight = state.heightCache[key] {
-                    return cachedHeight
-                } else {
-                    let newHeight = reviewConfig.height(with: tableView.bounds.size)
-                    state.heightCache[key] = newHeight
-                    return newHeight
-                }
+        let config = state.items[indexPath.row]
+        
+        // Для ReviewCellConfig используем кэш
+        if let reviewConfig = config as? ReviewCellConfig {
+            let key = reviewConfig.id
+            if let cachedHeight = state.heightCache[key] {
+                return cachedHeight
             } else {
-                // Для остальных типов высота фиксированная
-                return config.height(with: tableView.bounds.size)
+                let newHeight = reviewConfig.height(with: tableView.bounds.size)
+                state.heightCache[key] = newHeight
+                return newHeight
             }
+        } else {
+            // Для остальных типов высота фиксированная
+            return config.height(with: tableView.bounds.size)
         }
-
+    }
+    
     /// Метод дозапрашивает отзывы, если до конца списка отзывов осталось два с половиной экрана по высоте.
     func scrollViewWillEndDragging(
         _ scrollView: UIScrollView,
@@ -184,7 +223,7 @@ extension ReviewsViewModel: UITableViewDelegate {
             getReviews()
         }
     }
-
+    
     private func shouldLoadNextPage(
         scrollView: UIScrollView,
         targetOffsetY: CGFloat,
@@ -196,5 +235,5 @@ extension ReviewsViewModel: UITableViewDelegate {
         let remainingDistance = contentHeight - viewHeight - targetOffsetY
         return remainingDistance <= triggerDistance
     }
-
+    
 }

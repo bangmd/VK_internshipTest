@@ -15,6 +15,7 @@ final class ReviewsViewController: UIViewController {
     init(viewModel: ReviewsViewModel) {
         self.viewModel = viewModel
         super.init(nibName: nil, bundle: nil)
+        self.viewModel.reviewsViewController = self
     }
 
     required init?(coder: NSCoder) {

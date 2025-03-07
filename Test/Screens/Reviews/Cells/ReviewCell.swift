@@ -104,6 +104,7 @@ final class ReviewCell: UITableViewCell, UICollectionViewDelegate, UICollectionV
         return collectionView
     }()
     
+    var onImageTap: ((UIImage) -> Void)?
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -187,17 +188,17 @@ private extension ReviewCell {
     }
     
     func setupShowMoreIndicator() {
-        contentView.addSubview(showMoreIndicator) 
+        contentView.addSubview(showMoreIndicator)
         showMoreIndicator.isHidden = true
     }
     
     @objc
     private func didTapShowMore() {
         guard let id = config?.id else { return }
-
+        
         showMoreButton.isHidden = true
         showMoreIndicator.startAnimating()
-
+        
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
             self?.showMoreIndicator.stopAnimating()
             self?.showMoreButton.isHidden = false
@@ -362,16 +363,21 @@ fileprivate typealias Layout = ReviewCellLayout
 // MARK: - UICollectionViewDataSource
 
 extension ReviewCell {
-
-    @objc func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return config?.photoNames?.count ?? 0
     }
-
-    @objc(collectionView:cellForItemAtIndexPath:) func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PhotoCell
         if let photoName = config?.photoNames?[indexPath.row] {
             cell.setImage(named: photoName)
         }
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let photoName = config?.photoNames?[indexPath.row], let image = UIImage(named: photoName) else { return }
+        onImageTap?(image)
     }
 }

@@ -31,6 +31,7 @@
 		DB82612F2D78EDB2003EB4D9 /* ReviewsImageLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB82612E2D78EDB2003EB4D9 /* ReviewsImageLoader.swift */; };
 		DB8261312D78FF4E003EB4D9 /* LoadingIndicatorLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8261302D78FF4E003EB4D9 /* LoadingIndicatorLayer.swift */; };
 		DB8261332D7B4920003EB4D9 /* PhotoCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8261322D7B4920003EB4D9 /* PhotoCell.swift */; };
+		DB8261352D7B5048003EB4D9 /* PhotoViewerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB8261342D7B5048003EB4D9 /* PhotoViewerViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -59,6 +60,7 @@
 		DB82612E2D78EDB2003EB4D9 /* ReviewsImageLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewsImageLoader.swift; sourceTree = "<group>"; };
 		DB8261302D78FF4E003EB4D9 /* LoadingIndicatorLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingIndicatorLayer.swift; sourceTree = "<group>"; };
 		DB8261322D7B4920003EB4D9 /* PhotoCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCell.swift; sourceTree = "<group>"; };
+		DB8261342D7B5048003EB4D9 /* PhotoViewerViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoViewerViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -169,6 +171,7 @@
 				216668752D48F39E009AAA76 /* Cells */,
 				DB82612E2D78EDB2003EB4D9 /* ReviewsImageLoader.swift */,
 				DB8261302D78FF4E003EB4D9 /* LoadingIndicatorLayer.swift */,
+				DB8261342D7B5048003EB4D9 /* PhotoViewerViewController.swift */,
 			);
 			path = Reviews;
 			sourceTree = "<group>";
@@ -275,6 +278,7 @@
 				21B82E392D47B1320085DAA2 /* Review.swift in Sources */,
 				21B8416D2D47C0E20085DAA2 /* ReviewsViewModelState.swift in Sources */,
 				21B82E2E2D47B0640085DAA2 /* ReviewCell.swift in Sources */,
+				DB8261352D7B5048003EB4D9 /* PhotoViewerViewController.swift in Sources */,
 				21ED1F622D69CBCD0012D6F6 /* RootView.swift in Sources */,
 				21667B802D4A25B2009AAA76 /* RatingRenderer.swift in Sources */,
 				216668712D48E4B2009AAA76 /* NSAttributedString+Ext.swift in Sources */,
