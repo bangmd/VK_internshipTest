@@ -114,6 +114,9 @@ private extension ReviewsViewModel {
         let userName = (review.first_name + " " + review.last_name).attributed(font: .username)
         let rating = review.rating
         let avatarUrl = review.avatar_url
+        let availablePhotos = ["IMG_0001", "IMG_0002", "IMG_0003", "IMG_0004", "IMG_0005", "IMG_0006"]
+        let randomPhotos = Array(availablePhotos.shuffled().prefix(Int.random(in: 0...5)))
+        
         let item = ReviewItem(
             avatarURL: avatarUrl,
             userAvatar: userAvatar,
@@ -121,6 +124,7 @@ private extension ReviewsViewModel {
             rating: rating,
             reviewText: reviewText,
             created: created,
+            photoNames: randomPhotos,
             onTapShowMore: { [weak self] id in
                 self?.showMoreReview(with: id)
             }

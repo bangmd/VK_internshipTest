@@ -22,6 +22,8 @@ struct ReviewCellConfig {
     var maxLines = 3
     /// Время создания отзыва.
     let created: NSAttributedString
+    /// Массив изображений к отзыву
+    var photoNames: [String]?
     /// Замыкание, вызываемое при нажатии на кнопку "Показать полностью...".
     let onTapShowMore: (UUID) -> Void
     
@@ -45,6 +47,7 @@ extension ReviewCellConfig: TableCellConfig {
         cell.usernameLabel.attributedText = userName
         cell.ratingImageView.image = ratingRenderer.ratingImage(rating)
         cell.config = self
+        cell.updatePhotoGallery(photoNames: photoNames)
         
         if let avatarURL = avatarURL, let url = URL(string: avatarURL) {
             ImageLoader.shared.loadImage(from: url) { [weak cell] image in
@@ -76,7 +79,7 @@ private extension ReviewCellConfig {
 
 // MARK: - Cell
 
-final class ReviewCell: UITableViewCell {
+final class ReviewCell: UITableViewCell, UICollectionViewDelegate, UICollectionViewDataSource {
     private let showMoreIndicator = ShowMoreActivityIndicator(frame: CGRect(x: 0, y: 0, width: 16, height: 16))
     
     fileprivate var config: Config?
@@ -88,6 +91,18 @@ final class ReviewCell: UITableViewCell {
     fileprivate let avatarImageView = UIImageView()
     fileprivate let usernameLabel = UILabel()
     fileprivate let ratingImageView = UIImageView()
+    
+    private let photoCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .horizontal
+        layout.minimumInteritemSpacing = 8
+        layout.itemSize = CGSize(width: 55, height: 66)
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.isScrollEnabled = true
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        return collectionView
+    }()
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -108,8 +123,13 @@ final class ReviewCell: UITableViewCell {
         usernameLabel.frame = layout.usernameFrame
         ratingImageView.frame = layout.ratingFrame
         showMoreIndicator.center = showMoreButton.center
+        photoCollectionView.frame = layout.photoGalleryFrame
     }
     
+    func updatePhotoGallery(photoNames: [String]?) {
+        config?.photoNames = photoNames
+        photoCollectionView.reloadData()
+    }
 }
 
 // MARK: - Private
@@ -124,6 +144,14 @@ private extension ReviewCell {
         setupUsernameLabel()
         setupRatingImageView()
         setupShowMoreIndicator()
+        setupPhotoCollectionView()
+    }
+    
+    func setupPhotoCollectionView() {
+        contentView.addSubview(photoCollectionView)
+        photoCollectionView.dataSource = self
+        photoCollectionView.delegate = self
+        photoCollectionView.register(PhotoCell.self, forCellWithReuseIdentifier: "PhotoCell")
     }
     
     func setupReviewTextLabel() {
@@ -201,6 +229,7 @@ private final class ReviewCellLayout {
     private(set) var avatarFrame = CGRect.zero
     private(set) var usernameFrame = CGRect.zero
     private(set) var ratingFrame = CGRect.zero
+    private(set) var photoGalleryFrame = CGRect.zero
     
     // MARK: - Отступы
     
@@ -271,6 +300,16 @@ private final class ReviewCellLayout {
         // Сдвигаем maxY, чтобы текст отзыва шёл под рейтингом
         maxY = ratingFrame.maxY + ratingToTextSpacing
         
+        // Фото
+        if let photoAssets = config.photoNames, !photoAssets.isEmpty {
+            let galleryHeight: CGFloat = Self.photoSize.height
+            let galleryWidth = CGFloat(min(photoAssets.count, 5)) * (Self.photoSize.width + photosSpacing)
+            photoGalleryFrame = CGRect(x: rightBlockX, y: maxY, width: galleryWidth, height: galleryHeight)
+            maxY = photoGalleryFrame.maxY + photosToTextSpacing
+        } else {
+            photoGalleryFrame = .zero
+        }
+        
         // Текст отзыва
         var showShowMoreButton = false
         if !config.reviewText.isEmpty() {
@@ -318,3 +357,21 @@ private final class ReviewCellLayout {
 
 fileprivate typealias Config = ReviewCellConfig
 fileprivate typealias Layout = ReviewCellLayout
+
+
+// MARK: - UICollectionViewDataSource
+
+extension ReviewCell {
+
+    @objc func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return config?.photoNames?.count ?? 0
+    }
+
+    @objc(collectionView:cellForItemAtIndexPath:) func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PhotoCell", for: indexPath) as! PhotoCell
+        if let photoName = config?.photoNames?[indexPath.row] {
+            cell.setImage(named: photoName)
+        }
+        return cell
+    }
+}
