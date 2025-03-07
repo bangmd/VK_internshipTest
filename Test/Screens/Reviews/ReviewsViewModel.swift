@@ -44,6 +44,14 @@ extension ReviewsViewModel {
             }
         }
     }
+    
+    /// Метод сброса отзывов.
+    func refreshReviews() {
+        state.offset = 0
+        state.shouldLoad = true
+        getReviews()
+    }
+
 }
 
 // MARK: - Private
@@ -56,6 +64,7 @@ private extension ReviewsViewModel {
             let data = try result.get()
             let reviews = try decoder.decode(Reviews.self, from: data)
             state.items.removeAll { $0 is ReviewsCountCellConfig }
+            if state.offset == 0 { state.items.removeAll() }
             state.items += reviews.items.map(makeReviewItem)
             let countConfig = ReviewsCountCellConfig(totalCount: reviews.count)
             state.items.append(countConfig)

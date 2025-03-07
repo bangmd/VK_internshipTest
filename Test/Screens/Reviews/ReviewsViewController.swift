@@ -4,6 +4,7 @@ final class ReviewsViewController: UIViewController {
 
     private lazy var reviewsView = makeReviewsView()
     private let viewModel: ReviewsViewModel
+    private let refreshControl = UIRefreshControl()
 
     init(viewModel: ReviewsViewModel) {
         self.viewModel = viewModel
@@ -21,6 +22,8 @@ final class ReviewsViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        reviewsView.tableView.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(handlePullToRefresh), for: .valueChanged)
         setupViewModel()
         viewModel.getReviews()
     }
@@ -37,11 +40,20 @@ private extension ReviewsViewController {
         reviewsView.tableView.dataSource = viewModel
         return reviewsView
     }
-
+    
     func setupViewModel() {
-        viewModel.onStateChange = { [weak reviewsView] _ in
-            reviewsView?.tableView.reloadData()
+        viewModel.onStateChange = { [weak self] _ in
+            guard let self = self else { return }
+            self.reviewsView.tableView.reloadData()
+            
+            if self.refreshControl.isRefreshing {
+                self.refreshControl.endRefreshing()
+            }
         }
     }
-
+    
+    @objc
+    private func handlePullToRefresh() {
+        viewModel.refreshReviews()
+    }
 }
