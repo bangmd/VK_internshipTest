@@ -30,14 +30,22 @@ final class ReviewsViewModel: NSObject {
 extension ReviewsViewModel {
 
     typealias State = ReviewsViewModelState
-
+    
     /// Метод получения отзывов.
     func getReviews() {
         guard state.shouldLoad else { return }
         state.shouldLoad = false
+        
+        if state.offset == 0 && !state.isRefreshing {
+            state.isInitialLoading = true
+            DispatchQueue.main.async {
+                self.onStateChange?(self.state)
+            }
+        }
+        
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
-            self.reviewsProvider.getReviews(offset: state.offset) { result in
+            self.reviewsProvider.getReviews(offset: self.state.offset) { result in
                 DispatchQueue.main.async {
                     self.gotReviews(result)
                 }
@@ -49,9 +57,9 @@ extension ReviewsViewModel {
     func refreshReviews() {
         state.offset = 0
         state.shouldLoad = true
+        state.isRefreshing = true 
         getReviews()
     }
-
 }
 
 // MARK: - Private
@@ -73,6 +81,8 @@ private extension ReviewsViewModel {
         } catch {
             state.shouldLoad = true
         }
+        state.isInitialLoading = false
+        state.isRefreshing = false
         onStateChange?(state)
     }
 
